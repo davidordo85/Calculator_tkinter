@@ -124,6 +124,17 @@ class Display(ttk.Frame):
                 self.value = something
             else:
                 self.value += str(something)
+
+        if something == 'C':
+            self.value = '0'
+
+        if something == '+/-' and self.value != '0':
+            if self.value[0] == '-':
+                self.value = self.value[1:]
+            else:
+                self.value = '-' + self.value
+        if something == ',' and ',' not in self.value:
+            self.value += str(something)
         self.lbl.config(text=self.value)
 
 
