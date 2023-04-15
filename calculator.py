@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 
-dbuttons = [
+dButtons = [
     {
         "text": "1",
         "col": 0,
@@ -98,12 +98,64 @@ dbuttons = [
 class Controller(ttk.Frame):
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent, width=272, height=300)
-        d = Display(self)
-        d.grid(column=0, row=0, columnspan=4)
+        self.option_1 = 0
+        self.option_2 = 0
+        self.operation = ''
+        self.displayValue = '0'
 
-        for properties in dbuttons:
-            btn = CalcButton(self, properties['text'], d.paint, properties.get("W", 1), properties.get("H", 1))
+        self.display = Display(self)
+        self.display.grid(column=0, row=0, columnspan=4)
+
+        for properties in dButtons:
+            btn = CalcButton(self, properties['text'], self.set_operation, properties.get("W", 1), properties.get("H", 1))
             btn.grid(column=properties['col'], row=properties['row'], columnspan=properties.get("W", 1), rowspan=properties.get("H", 1))
+
+    def to_float(self, valor):
+        return float(valor.replace(',', '.'))
+
+    def calculate(self):
+        if self.operation == '+':
+            return self.option_1 + self.option_2
+        elif self.operation == '-':
+            return self.option_1 - self.option_2
+        elif self.operation == 'x':
+            return self.option_1 * self.option_2
+        elif self.operation == '÷':
+            return self.option_1 / self.option_2
+
+        return self.option_2
+
+    def set_operation(self, something):
+        if something.isdigit():
+            if self.displayValue == "0":
+                self.displayValue = something
+            else:
+                self.displayValue += str(something)
+        
+        if something == 'C':
+            self.displayValue = '0'
+
+        if something == '+/-' and self.displayValue != '0':
+            if self.displayValue[0] == '-':
+                self.displayValue = self.displayValue[1:]
+            else:
+                self.displayValue = '-' + self.displayValue
+
+        if something == ',' and ',' not in self.displayValue:
+            self.displayValue += str(something)
+
+        if something == '+' or something == '-' or something == 'x' or something == '÷':
+            self.option_1 = self.to_float(self.displayValue)
+            self.operation = something
+            self.displayValue = '0'
+
+        if something == '=':
+            self.option_2 = self.to_float(self.displayValue)
+            res = self.calculate()
+            self.displayValue = str(res)
+
+
+        self.display.paint(self.displayValue)
 
 class Display(ttk.Frame):
     value = "0"
@@ -119,23 +171,8 @@ class Display(ttk.Frame):
         self.lbl.pack(side=TOP, fill=BOTH, expand=True)
 
     def paint(self, something):
-        if something.isdigit():
-            if self.value == "0":
-                self.value = something
-            else:
-                self.value += str(something)
-
-        if something == 'C':
-            self.value = '0'
-
-        if something == '+/-' and self.value != '0':
-            if self.value[0] == '-':
-                self.value = self.value[1:]
-            else:
-                self.value = '-' + self.value
-        if something == ',' and ',' not in self.value:
-            self.value += str(something)
-        self.lbl.config(text=self.value)
+        self.value = something
+        self.lbl.config(text=something)
 
 
 class Selector(ttk.Radiobutton):
